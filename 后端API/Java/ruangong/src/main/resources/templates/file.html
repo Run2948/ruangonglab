@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>添加APP版本</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style type="text/css">
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">添加新版本<a href="/" class="btn btn-default pull-right">返回列表</a></div>
+        <div class="panel-body">
+            <form method="POST" enctype="multipart/form-data" action="/upload" role="form">
+                <div class="form-group">
+                    <label for="version">版本号</label>
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">V</button>
+                        </span>
+                        <input type="text" class="form-control" name="vernum" id="version"
+                               placeholder="请输入版本号,例如：1.1.0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="size">文件大小</label>
+                    <input type="text" name="filesize" id="size" class="form-control" placeholder="请输入文件大小,如：4.4.8MB、9.5KB等等">
+                </div>
+                <div class="form-group">
+                    <label for="updateinfo">更新内容</label>
+                    <textarea class="form-control" name="content" id="updateinfo" rows="10"
+                              placeholder="请输入更新内容(换行请用'\n'),如：将已经读取的图片做内存缓存\n内存紧张时将已读取的做硬盘缓存\n保持图片的不失真的最小尺寸，减少内存流量开销\n"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="file">文件输入</label>
+                    <input type="file" name="file" id="file">
+                    <p class="help-block">这里只能上传增量更新文件(.wgt)；文件名请尽量不要包含中文。</p>
+                </div>
+                <div class="btn-group btn-group-lg">
+                    <button type="submit" class="btn btn-primary">提交</button>
+                    <button type="reset" class="btn btn-default">重置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

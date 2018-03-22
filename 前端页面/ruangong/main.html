@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style>
+			ul {
+				font-size: 14px;
+				color: #8f8f94;
+			}
+			
+			.mui-btn {
+				padding: 10px;
+			}
+			
+			.link-area {
+				display: block;
+				margin-top: 25px;
+				text-align: center;
+			}
+			
+			.spliter {
+				color: #bbb;
+				padding: 0px 8px;
+			}
+			
+			.hide {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
+			<h1 class="mui-title">开始签到</h1>
+			<button id='setting' class=" mui-pull-right mui-btn-link">设置</button>
+		</header>
+		<div class="mui-content">
+			<div class="mui-row" style="padding-bottom:30px;padding-top:20px;">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						您好 <span id='stuname'></span>，欢迎回来。<a style="display: inline;float: right;margin-right: 20px;font-size:16px;" id="reload">立即刷新 <i class="mui-icon mui-icon-loop"></i></a>
+					</li>
+				</ul>
+			</div>
+			<div class="mui-row" style="padding-bottom:30px;">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell" id="arrive">
+						<a class="mui-navigate-right">今日签到人员<span class="mui-badge mui-badge-primary" id="arrive_count">0</span></a>
+					</li>
+					<li class="mui-table-view-cell" id="leave">
+						<a class="mui-navigate-right">今日请假人员<span class="mui-badge mui-badge-success" id="leave_count">0</span></a>
+					</li>
+					<li class="mui-table-view-cell" id="unsign">
+						<a class="mui-navigate-right">今日旷到人员<span class="mui-badge mui-badge-red" id="unsign_count">0</span></a>
+					</li>
+				</ul>
+			</div>
+			<div class="mui-content-padded hide" id="adminDiv" style="padding-bottom:30px;">
+				<div class="link-area">
+					<button type="button" class="mui-btn mui-btn-block mui-btn-danger" id="start_sign">&nbsp;&nbsp;重置签到状态&nbsp;&nbsp;</button>
+				</div>
+			</div>
+			<div class="mui-content-padded hide" id="signDiv">
+				<div class="link-area">
+					<button type="button" class="mui-btn mui-btn-primary" id="tosign">&nbsp;&nbsp;我要签到&nbsp;&nbsp;</button>
+					<span class="spliter">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+					<button type="button" class="mui-btn mui-btn-success" id="toleave">&nbsp;&nbsp;我要请假&nbsp;&nbsp;</button>
+				</div>
+			</div>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script src="js/app.js"></script>
+		<script>
+			(function($, doc) {
+				$.init();
+				var settings = app.getSettings();
+				var name = doc.getElementById('stuname');
+				var arrive_count = doc.getElementById('arrive_count');
+				var leave_count = doc.getElementById('leave_count');
+				var unsign_count = doc.getElementById('unsign_count');
+				
+				var initCount = function(state){					
+					// ===================    是否签到      =======================
+					mui.ajax('http://192.168.219.55:8000/api/sign/signorleave', {
+						data: {account: state.account},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						success: function(result) {
+							//mui.toast(result);
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							if(result.status > 0) {
+								// 没有签到
+								doc.getElementById('signDiv').classList.remove('hide');
+							}else{
+								doc.getElementById('signDiv').classList.add('hide');
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							//console.log(type);
+						}
+					});					
+					// ===================    请假人数   =========================					
+					mui.ajax('http://192.168.219.55:8000/api/sign/leavecount', {
+						dataType: 'json', //服务器返回json格式数据
+						type: 'get', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(result) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							if(result.status > 0) {
+								leave_count.innerText = "0";
+							} else {
+								leave_count.innerText = result.data;
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							//console.log(type);
+						}
+					});
+					
+					// ===================    签到人数      =======================			
+					mui.ajax('http://192.168.219.55:8000/api/sign/arrivecount', {
+						dataType: 'json', //服务器返回json格式数据
+						type: 'get', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(result) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							if(result.status > 0) {
+								arrive_count.innerText = "0";
+							} else {
+								arrive_count.innerText = result.data;
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							//console.log(type);
+						}
+					});
+					
+					// ===================    旷到人数      =======================					
+					mui.ajax('http://192.168.219.55:8000/api/sign/unsigncount', {
+						dataType: 'json', //服务器返回json格式数据
+						type: 'get', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(result) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							if(result.status > 0) {
+								unsign_count.innerText = "0";
+							} else {
+								unsign_count.innerText = result.data;
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							//console.log(type);
+						}
+					});					
+				}
+				
+				// 页面初始化
+				window.addEventListener('show', function() {
+					state = app.getState();
+					name.innerText = state.stuname;
+
+					// ===================   管理员操作     ======================
+					if(state.account == '163821017' || state.account == '163821005' || state.account == '163821045') {
+						doc.getElementById('adminDiv').classList.remove('hide');
+					}
+					
+					initCount(state);
+					
+				}, false);
+
+				
+				
+				$.plusReady(function() {
+					var settingPage = $.preload({
+						"id": 'setting',
+						"url": 'setting.html'
+					});
+					// ===================    设置页面      =======================
+					var settingButton = doc.getElementById('setting');
+					//settingButton.style.display = settings.autoLogin ? 'block' : 'none';
+					settingButton.addEventListener('tap', function(event) {
+						//$.fire(settingPage, 'show', null);
+						$.openWindow({
+							id: 'setting',
+							show: {
+								aniShow: 'pop-in'
+							},
+							styles: {
+								popGesture: 'hide'
+							},
+							waiting: {
+								autoShow: false
+							}
+						});
+					});
+
+					// ===================    签到列表     ======================= 
+					var arriveLi = doc.getElementById('arrive');
+					arriveLi.addEventListener('tap', function(event) {
+						$.openWindow({
+							url: 'signin.html',
+							id: 'signin',
+							preload: true,
+							show: {
+								aniShow: 'pop-in'
+							},
+							styles: {
+								popGesture: 'hide'
+							},
+							waiting: {
+								autoShow: false
+							}
+						});
+					}, false);
+
+					// ===================    请假列表     =======================
+					var leaveLi = doc.getElementById('leave');
+					leaveLi.addEventListener('tap', function(event) {
+						$.openWindow({
+							url: 'leave.html',
+							id: 'leave',
+							preload: true,
+							show: {
+								aniShow: 'pop-in'
+							},
+							styles: {
+								popGesture: 'hide'
+							},
+							waiting: {
+								autoShow: false
+							}
+						});
+					}, false);
+
+					// ===================    旷到列表     =======================
+					var unsignLi = doc.getElementById('unsign');
+					unsignLi.addEventListener('tap', function(event) {
+						$.openWindow({
+							url: 'unsign.html',
+							id: 'unsign',
+							preload: true,
+							show: {
+								aniShow: 'pop-in'
+							},
+							styles: {
+								popGesture: 'hide'
+							},
+							waiting: {
+								autoShow: false
+							}
+						});
+					}, false);
+
+					// ===================    开始签到     =======================
+					var signButton = doc.getElementById('tosign');
+					signButton.addEventListener('tap', function(event) {
+						mui.ajax('http://192.168.219.55:8000/api/sign/arrive', {
+							data: {account: state.account},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(result) {
+								//mui.toast(result.msg);
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								if(result.status > 0) {
+									mui.toast("网络异常，请稍后重试！");
+								} else {
+									mui.toast(state.stuname + ",恭喜您签到成功！");
+									//doc.getElementById('signDiv').classList.add('hide');
+									initCount(app.getState());
+								}
+							},
+							error: function(xhr, type, errorThrown) {
+								//异常处理；
+								//console.log(type);
+								mui.toast(errorThrown);
+							}
+						});
+					}, false);
+
+					// ===================    开始请假     =======================
+					var leaveButton = doc.getElementById('toleave');
+					leaveButton.addEventListener('tap', function(event) {
+						mui.ajax('http://192.168.219.55:8000/api/sign/leave', {
+							data: {account: state.account},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(result) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								if(result.status > 0) {
+									mui.toast("网络异常，请稍后重试！");
+								} else {
+									mui.toast(state.stuname + ",恭喜您请假成功！");
+									//doc.getElementById('signDiv').classList.add('hide');
+									initCount(app.getState());
+								}
+							},
+							error: function(xhr, type, errorThrown) {
+								//异常处理；
+								//console.log(type);
+								mui.toast(errorThrown);
+							}
+						});
+					}, false);
+
+					// ===================    刷新操作     ======================
+					var reloadButton = doc.getElementById('reload');
+					var wait = 0;
+					reloadButton.addEventListener('tap',function(){
+						if(wait == 0){													
+							initCount(app.getState());
+							wait = 1;
+						}else{
+							mui.toast("兄dei儿，你过分了哈，服务器快要爆了。请15秒后重试！");
+							setTimeout(function(){
+								wait = 0;
+							},15000);
+						}
+					} ,false);					
+
+					
+					// ===================    管理员操作     =====================
+					var adminButton = doc.getElementById('start_sign');
+					adminButton.addEventListener('tap', function(event) {
+						var btnArray = ['确定', '取消'];
+						mui.confirm('重置签到状态后会丢失所有成员的签到信息，确认？', '管理员操作', btnArray, function(e) {
+							if(e.index == 0) {
+								mui.ajax('http://192.168.219.55:8000/api/sign/adminsign', {
+									dataType: 'json', //服务器返回json格式数据
+									type: 'post', //HTTP请求类型
+									timeout: 10000, //超时时间设置为10秒；
+									headers: {
+										'Content-Type': 'application/x-www-form-urlencoded'
+									},
+									success: function(result) {
+										//服务器返回响应，根据响应结果，分析是否登录成功；
+										if(result.status > 0) {
+											mui.toast("网络异常，请稍后重试！");
+										} else {
+											mui.toast(state.stuname + "管理员,您成功重置签到状态！");
+											//doc.getElementById('adminDiv').classList.add('hide');
+											initCount();
+										}
+									},
+									error: function(xhr, type, errorThrown) {
+										//异常处理；
+										//console.log(type);
+										mui.toast(errorThrown);
+									}
+								});
+							} else {
+								mui.toast("凡事就应该三四而后行~");
+							}
+						})
+						
+						
+					}, false);
+
+					//--
+					$.oldBack = mui.back;
+					var backButtonPress = 0;
+					$.back = function(event) {
+						backButtonPress++;
+						if(backButtonPress > 1) {
+							plus.runtime.quit();
+						} else {
+							plus.nativeUI.toast('再按一次退出应用');
+						}
+						setTimeout(function() {
+							backButtonPress = 0;
+						}, 1000);
+						return false;
+					};
+				});
+			}(mui, document));
+		</script>
+	</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/mui.min.css">
+		<style>
+			.center {
+				text-align: center;
+			}
+			.success{
+				color:#4cd964;
+			}
+			.primary{
+				color:#007aff;
+			}
+			.weight{
+				font-weight: bolder;
+				padding-right: 10px;
+			}
+			.red{
+				color:red;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!--下拉刷新容器-->
+		<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+			<div class="mui-scroll">
+				<!--数据列表-->
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell" style="text-align: center;">
+						<span>没有数据？下拉看看</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script>
+			mui.init({
+				pullRefresh: {
+					container: '#pullrefresh',
+					down: {
+						callback: pulldownRefresh
+					},
+					//					up: {
+					//						contentrefresh: '正在加载...',
+					//						callback: pullupRefresh
+					//					}
+				}
+			});
+
+			function loadData() {
+				var table = document.body.querySelector('.mui-table-view');
+				var cells = document.body.querySelectorAll('.mui-table-view-cell');
+				mui.ajax('http://192.168.219.55:8000/api/sign/arriveall', {
+					dataType: 'json', //服务器返回json格式数据
+					type: 'get', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					success: function(result) {
+						//服务器返回响应，根据响应结果，分析是否登录成功；
+						//mui.toast(result);
+						table.innerHTML = "";
+						if(result.status > 0|| result.data.length == 0) {
+							var li = document.createElement('li');
+							li.className = 'mui-table-view-cell center';
+							li.innerHTML = "暂无签到人员";
+							//下拉刷新，新纪录插到最前面；
+							table.insertBefore(li, table.firstChild);
+						} else {
+							for(var i = 0; i < result.data.length; i++) {
+								var li = document.createElement('li');
+								li.className = 'mui-table-view-cell center';
+								li.innerHTML = '<span class="weight">'+result.data[i].stuname+'</span><span class="primary">签到</span>'+result.data[i].signall+'次 <span class="success">请假</span>'+result.data[i].leaveall+'次 </span><span class="red">旷到</span>'+(parseInt(result.msg)- result.data[i].leaveall - result.data[i].signall)+'次</span>';
+								//下拉刷新，新纪录插到最前面；
+								table.insertBefore(li, table.firstChild);
+							}
+						}
+					},
+					error: function(xhr, type, errorThrown) {
+						//异常处理；
+						//console.log(type);
+						//mui.toast(errorThrown);
+					}
+				});
+				mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //refresh completed
+			}
+
+			/**
+			 * 下拉刷新具体业务实现
+			 */
+			function pulldownRefresh() {
+				setTimeout(function() {
+					loadData();
+				}, 1500);
+			}
+
+			/**
+			 * 上拉加载具体业务实现
+			 */
+			//			function pullupRefresh() {
+			//				setTimeout(function() {
+			//					loadData();
+			//				}, 1500);
+			//			}
+		</script>
+	</body>
+
+</html>

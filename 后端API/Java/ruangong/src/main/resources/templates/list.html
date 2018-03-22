@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>软工签到APP管理</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style type="text/css">
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">版本列表 <a href="/add" class="btn btn-default pull-right">添加新版本</a></div>
+            <div class="panel-body">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>版本号</th>
+                        <th>文件大小</th>
+                        <th>更新信息</th>
+                        <th>文件路径</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="version : ${verList}">
+                        <td th:text="${version.vernum}"></td>
+                        <td th:text="${version.filesize}"></td>
+                        <td th:text="${version.content}"></td>
+                        <td><a th:href="@{'/download?id='+${version.id}}" target="_blank">点击下载</a></td>
+                        <td><a th:href="@{'/del?id='+${version.id}}" class="btn btn-default">删除</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

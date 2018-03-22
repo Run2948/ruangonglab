@@ -1,0 +1,49 @@
+{
+  "main.html": {
+    "refer": [
+      "setting.html",
+      "signin.html",
+      "leave.html",
+      "unsign.html"
+    ]
+  },
+  "login.html": {
+    "refer": [
+      "main.html"
+    ]
+  },
+  "signin.html": {
+    "resources": [
+      "signin_sub.html"
+    ],
+    "refer": [
+      "signin_sub.html"
+    ]
+  },
+  "leave.html": {
+    "resources": [
+      "leave_sub.html"
+    ],
+    "refer": [
+      "leave_sub.html"
+    ]
+  },
+  "setting.html": {
+    "refer": [
+      "password.html"
+    ]
+  },
+  "password.html": {
+    "refer": [
+      "login.html"
+    ]
+  },
+  "unsign.html": {
+    "resources": [
+      "unsign_sub.html"
+    ],
+    "refer": [
+      "unsign_sub.html"
+    ]
+  }
+}
